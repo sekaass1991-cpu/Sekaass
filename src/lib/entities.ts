@@ -1,4 +1,6 @@
 import { createCollection, genId } from './storage';
+import { getSettings } from './settings';
+import { isEmailConfigured, sendEmail } from './email';
 import type {
   User,
   Client,
@@ -60,4 +62,16 @@ export function pushNotification(
     createdAt: new Date().toISOString(),
     actionRequired,
   });
+
+  if (audience === 'client' && clientId) {
+    const settings = getSettings();
+    if (isEmailConfigured(settings)) {
+      const client = clientsStore.getById(clientId);
+      if (client?.email) {
+        sendEmail(settings, { toEmail: client.email, toName: client.name, subject: title, message }).catch(() => {
+          // Best-effort — the in-app notification above already recorded this.
+        });
+      }
+    }
+  }
 }

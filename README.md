@@ -64,3 +64,9 @@ build.
   Claude API key under Admin → Settings → AI Assistant to have it answer for
   real (see the in-app notice there about the key being visible client-side,
   since this app has no backend).
+- Client-facing notifications (new invoices, compliance deadlines, document
+  status changes, messages, and the new-client welcome email) also send a
+  real email via [EmailJS](https://www.emailjs.com) once you add your Service
+  ID, Template ID, and Public Key under Admin → Settings → Email. Your
+  EmailJS template needs `to_email`, `to_name`, `from_name`, `subject`, and
+  `message` variables. Use "Send Test Email" there to verify it's working.

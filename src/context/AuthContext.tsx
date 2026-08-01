@@ -63,6 +63,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       writeRaw(SESSION_KEY, newUser.id);
       logAudit(name, 'client', 'Registered account', 'Client', clientId, `${name} registered a new client account`);
       pushNotification('admin', 'New client registration', `${businessName} (${name}) has registered and is pending review.`, 'info', clientId, true);
+      pushNotification(
+        'client',
+        'Welcome to TaxTitan Consultancy',
+        `Hi ${name}, your account for ${businessName} has been created and is pending review by our team. We'll be in touch shortly.`,
+        'success',
+        clientId,
+      );
       return { ok: true };
     },
     logout() {

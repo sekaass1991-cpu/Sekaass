@@ -5,6 +5,8 @@ import { Button } from '../../components/ui/Button';
 import { Input, Select } from '../../components/ui/Field';
 import { useSettings, updateSettings } from '../../lib/settings';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
+import { isEmailConfigured, sendEmail } from '../../lib/email';
 import type { ClaudeModel, FirmSettings } from '../../types';
 
 const CLAUDE_MODELS: { id: ClaudeModel; label: string }[] = [
@@ -17,11 +19,26 @@ const CLAUDE_MODELS: { id: ClaudeModel; label: string }[] = [
 export function AdminSettings() {
   const settings = useSettings();
   const { show } = useToast();
+  const { user } = useAuth();
   const [form, setForm] = useState<FirmSettings>(settings);
+  const [sendingTest, setSendingTest] = useState(false);
 
   const save = () => {
     updateSettings(form);
     show('Settings saved.', 'success');
+  };
+
+  const sendTestEmail = async () => {
+    if (!user?.email) return;
+    setSendingTest(true);
+    const result = await sendEmail(form, {
+      toEmail: user.email,
+      toName: user.name,
+      subject: 'TaxTitan Consultancy — test email',
+      message: 'This is a test email confirming your EmailJS configuration is working.',
+    });
+    setSendingTest(false);
+    show(result.ok ? `Test email sent to ${user.email}.` : `Failed to send: ${result.error}`, result.ok ? 'success' : 'error');
   };
 
   return (
@@ -55,11 +72,23 @@ export function AdminSettings() {
       </Card>
 
       <Card>
-        <CardHeader title="Email (EmailJS)" subtitle="Used for OTPs and email notifications" />
+        <CardHeader title="Email (EmailJS)" subtitle="Used for client notifications and welcome emails" />
         <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
           <Input label="EmailJS Service ID" value={form.emailjsServiceId ?? ''} onChange={(e) => setForm({ ...form, emailjsServiceId: e.target.value })} />
           <Input label="EmailJS Template ID" value={form.emailjsTemplateId ?? ''} onChange={(e) => setForm({ ...form, emailjsTemplateId: e.target.value })} />
           <Input label="EmailJS Public Key" value={form.emailjsPublicKey ?? ''} onChange={(e) => setForm({ ...form, emailjsPublicKey: e.target.value })} />
+        </div>
+        <div className="mx-4 mb-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+          Your EmailJS template should use these variables:{' '}
+          <code className="text-slate-700">to_email</code>, <code className="text-slate-700">to_name</code>,{' '}
+          <code className="text-slate-700">from_name</code>, <code className="text-slate-700">subject</code>, and{' '}
+          <code className="text-slate-700">message</code>. Once set up, invoices, compliance deadlines, document
+          reviews, messages, and new client welcome emails are all sent automatically.
+        </div>
+        <div className="mx-4 mb-4 flex justify-end">
+          <Button variant="secondary" size="sm" disabled={!isEmailConfigured(form) || sendingTest} onClick={sendTestEmail}>
+            {sendingTest ? 'Sending…' : 'Send Test Email'}
+          </Button>
         </div>
       </Card>
 
