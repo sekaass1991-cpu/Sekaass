@@ -27,7 +27,7 @@ export function Login() {
     setRole(demoRole);
     setMode('login');
     if (demoRole === 'admin') {
-      setEmail('admin@sekaass.com');
+      setEmail('admin@taxtitan.com');
       setPassword('admin123');
     } else {
       setEmail('arjun.kumar@example.com');
@@ -53,7 +53,7 @@ export function Login() {
         setError(result.error ?? 'Registration failed.');
         return;
       }
-      show('Account created. Welcome to Sekaass!', 'success');
+      show('Account created. Welcome to TaxTitan!', 'success');
       navigate('/client');
     }
   };
@@ -65,7 +65,7 @@ export function Login() {
           <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-indigo-600 text-white">
             <Landmark className="size-6" />
           </div>
-          <h1 className="text-lg font-semibold text-slate-900">Sekaass & Associates</h1>
+          <h1 className="text-lg font-semibold text-slate-900">TaxTitan Consultancy</h1>
           <p className="text-sm text-slate-500">Practice management for your firm and clients</p>
         </div>
 

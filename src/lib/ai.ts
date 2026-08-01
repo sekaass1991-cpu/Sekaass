@@ -14,7 +14,7 @@ function localReply(prompt: string, context: string): string {
     return `Based on your current records:\n\n${context}`;
   }
   if (lower.includes('help') || lower.includes('hi') || lower.includes('hello')) {
-    return "Hi! I'm your Sekaass AI Assistant. Ask me about outstanding invoices, upcoming compliance deadlines, or client status, and I'll summarize what's in your workspace. Add an API key in Settings to connect a real language model for richer answers.";
+    return "Hi! I'm your TaxTitan AI Assistant. Ask me about outstanding invoices, upcoming compliance deadlines, or client status, and I'll summarize what's in your workspace. Add an API key in Settings to connect a real language model for richer answers.";
   }
   return `I can only give simple summaries right now since no AI API key is configured (see Settings > API Settings). Here's a quick snapshot of your data:\n\n${context}`;
 }

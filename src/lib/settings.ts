@@ -4,7 +4,7 @@ import type { FirmSettings } from '../types';
 const KEY = 'settings';
 
 const DEFAULT_SETTINGS: FirmSettings = {
-  firmName: 'Sekaass & Associates',
+  firmName: 'TaxTitan Consultancy',
   autoBackupFrequency: 'Weekly',
   autoReminders: true,
 };

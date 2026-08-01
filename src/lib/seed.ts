@@ -123,7 +123,7 @@ export function ensureSeedData() {
       id: 'user_admin',
       role: 'admin',
       name: 'Admin User',
-      email: 'admin@sekaass.com',
+      email: 'admin@taxtitan.com',
       password: 'admin123',
       phone: '+91 90000 00001',
       createdAt: isoDaysFromNow(-700),
@@ -290,11 +290,11 @@ export function ensureSeedData() {
   const credentials: Credential[] = [
     { id: genId('cred'), clientId: 'client_1', clientName: 'Arjun Kumar Textiles', portalName: 'GST Portal', username: 'arjunk_gst', password: 'demo-password', updatedAt: isoDaysFromNow(-90) },
     { id: genId('cred'), clientId: 'client_2', clientName: 'Nair Design Studio LLP', portalName: 'Income Tax Portal', username: 'nair_llp_it', password: 'demo-password', updatedAt: isoDaysFromNow(-60) },
-    { id: genId('cred'), portalName: 'MCA Portal (Firm)', username: 'sekaass_firm', password: 'demo-password', updatedAt: isoDaysFromNow(-200), notes: 'Shared firm-level MCA login' },
+    { id: genId('cred'), portalName: 'MCA Portal (Firm)', username: 'taxtitan_firm', password: 'demo-password', updatedAt: isoDaysFromNow(-200), notes: 'Shared firm-level MCA login' },
   ];
 
   const settings: FirmSettings = {
-    firmName: 'Sekaass & Associates',
+    firmName: 'TaxTitan Consultancy',
     autoBackupFrequency: 'Weekly',
     autoReminders: true,
   };

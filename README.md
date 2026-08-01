@@ -1,4 +1,4 @@
-# Sekaass & Associates
+# TaxTitan Consultancy
 
 A practice management app for a Chartered Accountant / accounting firm, with
 separate Admin and Client portals. Built with React, TypeScript, Vite, and
@@ -28,7 +28,7 @@ npm run dev
 Open the printed local URL and sign in with one of the demo accounts (or use
 the "Demo Admin" / "Demo Client" buttons on the login screen):
 
-- Admin: `admin@sekaass.com` / `admin123`
+- Admin: `admin@taxtitan.com` / `admin123`
 - Client: `arjun.kumar@example.com` / `client123`
 
 New clients can also self-register from the Client Portal login screen.
