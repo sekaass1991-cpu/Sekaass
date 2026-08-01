@@ -9,7 +9,10 @@ export function Sidebar({ items, portalLabel, mobile }: { items: NavItem[]; port
 
   return (
     <aside className={clsx('w-64 shrink-0 flex-col border-r border-slate-200 bg-white', mobile ? 'flex' : 'hidden lg:flex')}>
-      <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-5">
+      <div
+        className="flex items-center gap-2 border-b border-slate-100 px-5 py-5"
+        style={{ paddingTop: 'max(1.25rem, calc(1.25rem + env(safe-area-inset-top)))' }}
+      >
         <BrandMark logoUrl={settings.logoUrl} size={36} />
         <div>
           <p className="text-sm font-semibold text-slate-900">{settings.firmName}</p>

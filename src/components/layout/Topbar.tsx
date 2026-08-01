@@ -31,7 +31,10 @@ export function Topbar({ title, items, portalLabel }: { title: string; items: Na
   };
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur lg:px-6">
+    <header
+      className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur lg:px-6"
+      style={{ paddingTop: 'max(0.75rem, calc(0.75rem + env(safe-area-inset-top)))' }}
+    >
       <div className="flex items-center gap-3">
         <button className="text-slate-500 lg:hidden" onClick={() => setShowMobileNav(true)}>
           <Menu className="size-5" />
