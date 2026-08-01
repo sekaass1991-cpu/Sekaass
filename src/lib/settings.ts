@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS: FirmSettings = {
   logoUrl: '/brand/logo-icon.png',
   autoBackupFrequency: 'Weekly',
   autoReminders: true,
+  claudeModel: 'claude-sonnet-5',
 };
 
 export function getSettings(): FirmSettings {

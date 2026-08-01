@@ -1,10 +1,18 @@
 import { useState } from 'react';
+import { TriangleAlert } from 'lucide-react';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input, Select } from '../../components/ui/Field';
 import { useSettings, updateSettings } from '../../lib/settings';
 import { useToast } from '../../context/ToastContext';
-import type { FirmSettings } from '../../types';
+import type { ClaudeModel, FirmSettings } from '../../types';
+
+const CLAUDE_MODELS: { id: ClaudeModel; label: string }[] = [
+  { id: 'claude-sonnet-5', label: 'Claude Sonnet 5' },
+  { id: 'claude-opus-5', label: 'Claude Opus 5' },
+  { id: 'claude-fable-5', label: 'Claude Fable 5' },
+  { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5' },
+];
 
 export function AdminSettings() {
   const settings = useSettings();
@@ -47,14 +55,33 @@ export function AdminSettings() {
       </Card>
 
       <Card>
-        <CardHeader title="API Settings" subtitle="Connect EmailJS for notifications and an AI provider for the assistant" />
+        <CardHeader title="Email (EmailJS)" subtitle="Used for OTPs and email notifications" />
         <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
           <Input label="EmailJS Service ID" value={form.emailjsServiceId ?? ''} onChange={(e) => setForm({ ...form, emailjsServiceId: e.target.value })} />
           <Input label="EmailJS Template ID" value={form.emailjsTemplateId ?? ''} onChange={(e) => setForm({ ...form, emailjsTemplateId: e.target.value })} />
           <Input label="EmailJS Public Key" value={form.emailjsPublicKey ?? ''} onChange={(e) => setForm({ ...form, emailjsPublicKey: e.target.value })} />
-          <div />
-          <Input label="AI API Endpoint" placeholder="https://api.example.com/v1/chat/completions" value={form.aiApiEndpoint ?? ''} onChange={(e) => setForm({ ...form, aiApiEndpoint: e.target.value })} />
-          <Input label="AI API Key" type="password" value={form.aiApiKey ?? ''} onChange={(e) => setForm({ ...form, aiApiKey: e.target.value })} />
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader title="AI Assistant (Claude)" subtitle="Connect the AI Assistant to Claude" />
+        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+          <Select label="Model" value={form.claudeModel} onChange={(e) => setForm({ ...form, claudeModel: e.target.value as ClaudeModel })}>
+            {CLAUDE_MODELS.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+              </option>
+            ))}
+          </Select>
+          <Input label="Claude API Key" type="password" placeholder="sk-ant-..." value={form.claudeApiKey ?? ''} onChange={(e) => setForm({ ...form, claudeApiKey: e.target.value })} />
+        </div>
+        <div className="mx-4 mb-4 flex gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+          <TriangleAlert className="size-4 shrink-0" />
+          <p>
+            This app has no backend, so the key is used directly from your browser and stored in this browser&apos;s
+            local storage. It will be visible in network requests to anyone with access to this device — fine for a
+            personal or demo setup, not recommended for a shared or public deployment.
+          </p>
         </div>
       </Card>
 

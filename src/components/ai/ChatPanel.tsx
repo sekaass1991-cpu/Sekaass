@@ -51,7 +51,7 @@ export function ChatPanel({ storageKey, contextLabel, buildContext }: { storageK
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {ordered.length === 0 && (
           <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-500">
-            Ask me things like "what's overdue" or "summarize my clients". Configure an API key in Settings for richer, model-generated answers.
+            Ask me things like "what's overdue" or "summarize my clients". Add a Claude API key in Settings for richer, model-generated answers.
           </p>
         )}
         {ordered.map((m) => (

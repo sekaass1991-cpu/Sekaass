@@ -298,6 +298,7 @@ export function ensureSeedData() {
     logoUrl: '/brand/logo-icon.png',
     autoBackupFrequency: 'Weekly',
     autoReminders: true,
+    claudeModel: 'claude-sonnet-5',
   };
 
   usersStore.set(users);

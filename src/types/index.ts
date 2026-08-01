@@ -197,6 +197,8 @@ export interface Credential {
   updatedAt: string;
 }
 
+export type ClaudeModel = 'claude-sonnet-5' | 'claude-opus-5' | 'claude-fable-5' | 'claude-haiku-4-5-20251001';
+
 export interface FirmSettings {
   firmName: string;
   logoUrl?: string;
@@ -205,6 +207,6 @@ export interface FirmSettings {
   emailjsServiceId?: string;
   emailjsTemplateId?: string;
   emailjsPublicKey?: string;
-  aiApiKey?: string;
-  aiApiEndpoint?: string;
+  claudeApiKey?: string;
+  claudeModel: ClaudeModel;
 }
