@@ -33,10 +33,34 @@ the "Demo Admin" / "Demo Client" buttons on the login screen):
 
 New clients can also self-register from the Client Portal login screen.
 
+## Android app
+
+The web app is wrapped as a native Android app with [Capacitor](https://capacitorjs.com).
+
+**Get a build without installing anything:** push to GitHub (or run the
+"Build Android APK" workflow manually from the Actions tab) and download the
+`taxtitan-consultancy-debug-apk` artifact once it finishes — that's a
+GitHub-hosted build with full internet access, so it doesn't need anything
+installed locally.
+
+**Build locally** (needs Android Studio / the Android SDK installed):
+
+```bash
+npm run android:build   # builds the web app, syncs it into android/, and assembles the debug APK
+# APK lands at android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Or open the native project in Android Studio with `npm run android:open` and
+run it from there. Whenever you change the web app, re-run `npm run
+android:sync` before rebuilding so the native project picks up the latest
+build.
+
 ## Notes
 
 - All data lives in `localStorage` under the `sekaass:` prefix; clearing
-  browser storage resets the app back to its seed data.
-- The AI Assistant gives simple data-aware summaries out of the box. Add an
-  API key and endpoint under Admin → Settings → API Settings to connect it to
-  a real chat-completions-compatible API.
+  browser storage resets the app back to its seed data. On Android this is
+  scoped to the app's own WebView storage, separate from any browser.
+- The AI Assistant gives simple data-aware summaries out of the box. Add a
+  Claude API key under Admin → Settings → AI Assistant to have it answer for
+  real (see the in-app notice there about the key being visible client-side,
+  since this app has no backend).
