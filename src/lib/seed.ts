@@ -295,6 +295,7 @@ export function ensureSeedData() {
 
   const settings: FirmSettings = {
     firmName: 'TaxTitan Consultancy',
+    logoUrl: '/brand/logo-icon.png',
     autoBackupFrequency: 'Weekly',
     autoReminders: true,
   };

@@ -5,6 +5,7 @@ const KEY = 'settings';
 
 const DEFAULT_SETTINGS: FirmSettings = {
   firmName: 'TaxTitan Consultancy',
+  logoUrl: '/brand/logo-icon.png',
   autoBackupFrequency: 'Weekly',
   autoReminders: true,
 };

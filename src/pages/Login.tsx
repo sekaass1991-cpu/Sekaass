@@ -1,16 +1,18 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { Landmark } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Field';
+import { BrandMark } from '../components/ui/BrandMark';
+import { useSettings } from '../lib/settings';
 import type { Role } from '../types';
 
 export function Login() {
   const { user, login, registerClient } = useAuth();
   const navigate = useNavigate();
   const { show } = useToast();
+  const settings = useSettings();
 
   const [role, setRole] = useState<Role>('admin');
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -62,10 +64,10 @@ export function Login() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-indigo-600 text-white">
-            <Landmark className="size-6" />
+          <div className="mb-3">
+            <BrandMark logoUrl={settings.logoUrl} size={64} />
           </div>
-          <h1 className="text-lg font-semibold text-slate-900">TaxTitan Consultancy</h1>
+          <h1 className="text-lg font-semibold text-slate-900">{settings.firmName}</h1>
           <p className="text-sm text-slate-500">Practice management for your firm and clients</p>
         </div>
 

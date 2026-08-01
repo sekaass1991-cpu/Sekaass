@@ -1,8 +1,8 @@
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
-import { Landmark } from 'lucide-react';
 import type { NavItem } from './nav';
 import { useSettings } from '../../lib/settings';
+import { BrandMark } from '../ui/BrandMark';
 
 export function Sidebar({ items, portalLabel, mobile }: { items: NavItem[]; portalLabel: string; mobile?: boolean }) {
   const settings = useSettings();
@@ -10,9 +10,7 @@ export function Sidebar({ items, portalLabel, mobile }: { items: NavItem[]; port
   return (
     <aside className={clsx('w-64 shrink-0 flex-col border-r border-slate-200 bg-white', mobile ? 'flex' : 'hidden lg:flex')}>
       <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-5">
-        <div className="flex size-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
-          <Landmark className="size-5" />
-        </div>
+        <BrandMark logoUrl={settings.logoUrl} size={36} />
         <div>
           <p className="text-sm font-semibold text-slate-900">{settings.firmName}</p>
           <p className="text-xs text-slate-400">{portalLabel}</p>
