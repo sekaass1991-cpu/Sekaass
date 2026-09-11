@@ -66,6 +66,20 @@ Because of how many special-access permissions this app uses (Notification
 Listener, Device Admin, VPN, call screening), **it must be sideloaded** —
 this will not pass Play Store review for a personal-use app like this.
 
+### Google Play Protect will likely block the first install
+
+Play Protect's on-device heuristic flags exactly this permission
+fingerprint — SMS, notification access, device admin, camera, phone state
+together — as spyware-like, regardless of what the app actually does, and
+can outright refuse to install it ("App blocked to protect your device").
+This is expected friction for this category of app, not a broken build. To
+get past it: Play Store app → profile icon → **Play Protect** → gear icon →
+turn off "Scan apps with Play Protect" (and "Improve harmful app
+detection") → install the APK → turn scanning back on afterward. Some
+phones (Samsung in particular) also have their own blocker — Settings →
+Security and privacy → **Auto Blocker** — that needs the same temporary
+toggle-off.
+
 ## First run
 
 Open the app and go through **Start setup** (`OnboardingActivity`). It
