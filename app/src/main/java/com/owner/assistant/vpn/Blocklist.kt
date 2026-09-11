@@ -13,6 +13,8 @@ import java.io.InputStreamReader
  */
 object Blocklist {
 
+    private const val ASSET_NAME = "blocklist.txt"
+
     @Volatile
     private var domains: Set<String> = emptySet()
 

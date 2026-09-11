@@ -29,7 +29,7 @@ the relevant class.
 | Emergency mode | `emergency/` | Location + SMS alert + silent audio recording + shake trigger |
 | Security watchdog | `security/` | Permission-heuristic advisor, daily `WorkManager` scan |
 | Ad blocking | `vpn/` | Local DNS sinkhole via `VpnService` (see limitations) |
-| Translator | `translate/Translator.kt` | ML Kit Translate + language ID, en/hi/ta/te/ml |
+| Translator | `translate/Translator.kt` | ML Kit Translate + language ID, en/hi/ta/te (Malayalam not supported by ML Kit — see limitations) |
 | Battery/data monitor | `service/BatteryDataMonitor.kt` | `UsageStatsManager`-based (see limitations) |
 | Scheduled DND | `service/DndScheduler.kt` | Sleep-window alarms + optional calendar check |
 | Onboarding | `onboarding/OnboardingActivity.kt` | Walks through every permission that can't be auto-granted |
@@ -100,6 +100,13 @@ walks through, in order:
   different voices. It is **not** the same false-accept guarantee a trained
   neural speaker-verification model (d-vector/x-vector) gives. If this needs
   to be airtight, swap in a trained on-device model.
+- **Translator doesn't cover Malayalam.** ML Kit Translate's on-device
+  language set (~59 languages) doesn't include Malayalam, so `translate/Translator.kt`
+  only supports English/Hindi/Tamil/Telugu even though the blueprint asks
+  for all four. Adding Malayalam would mean routing just that language
+  through a cloud API (e.g. Google Cloud Translation) instead of ML Kit's
+  on-device model — a real trade-off (network dependency, cost), so it's
+  left as a follow-up rather than silently faked.
 - **Ad blocking scope.** `vpn/AdBlockVpnService.kt` intercepts and filters
   only DNS lookups (by routing just the device's configured DNS server
   IP(s) through the tunnel) — it does not proxy general traffic, which
