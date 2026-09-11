@@ -80,6 +80,18 @@ phones (Samsung in particular) also have their own blocker — Settings →
 Security and privacy → **Auto Blocker** — that needs the same temporary
 toggle-off.
 
+### Android will also deny the sensitive permissions themselves at first
+
+Even after the app is installed, Android 13+'s "Restricted settings"
+protection silently denies a sideloaded app the sensitive toggles it asks
+for (Notification access, Accessibility) — trying to turn them on in
+Settings just shows "App was denied access" with no obvious way through.
+Fix once, per app: **Settings → Apps → See all apps → Personal Assistant →
+⋮ (top-right menu) → Allow restricted settings** (confirm with
+fingerprint/PIN). Then go back and toggle the permission on — it works
+immediately after that, and this only has to be done once, not once per
+permission.
+
 ## First run
 
 Open the app and go through **Start setup** (`OnboardingActivity`). It
