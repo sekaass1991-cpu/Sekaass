@@ -15,23 +15,23 @@ import com.owner.assistant.util.SpeechOutput
  *
  * Called from a background thread already (CommandRouter runs off the main
  * thread inside AssistantForegroundService) — this makes a blocking network
- * call via [AnthropicClient], so never call it from the main thread.
+ * call via [GeminiClient], so never call it from the main thread.
  */
 object AssistantChat {
 
     fun respondTo(context: Context, userText: String) {
-        if (OwnerProfileStore.getAnthropicApiKey(context) == null) {
+        if (OwnerProfileStore.getGeminiApiKey(context) == null) {
             SpeechOutput.speak("I don't have conversation mode set up yet. Open the chat screen in the app to add your API key.")
             return
         }
 
         ChatHistoryStore.add("user", userText)
         try {
-            val reply = AnthropicClient.sendMessageBlocking(context, ChatHistoryStore.all())
+            val reply = GeminiClient.sendMessageBlocking(context, ChatHistoryStore.all())
             ChatHistoryStore.add("assistant", reply)
             SpeechOutput.speakAuto(reply)
         } catch (e: Exception) {
-            Log.e(TAG, "Claude request failed", e)
+            Log.e(TAG, "Gemini request failed", e)
             SpeechOutput.speak("I couldn't reach the assistant service. Please check your internet connection or API key.")
         }
     }

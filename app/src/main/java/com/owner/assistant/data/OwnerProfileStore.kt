@@ -16,8 +16,8 @@ object OwnerProfileStore {
     private const val KEY_EMERGENCY_MESSAGE = "emergency_message_template"
     private const val KEY_WAKE_PHRASE = "wake_phrase"
     private const val KEY_VOICE_THRESHOLD = "voice_similarity_threshold"
-    private const val KEY_ANTHROPIC_API_KEY = "anthropic_api_key"
-    private const val KEY_ANTHROPIC_MODEL = "anthropic_model"
+    private const val KEY_GEMINI_API_KEY = "gemini_api_key"
+    private const val KEY_GEMINI_MODEL = "gemini_model"
 
     fun saveEnrollmentSample(context: Context, embedding: FloatArray) {
         val prefs = SecureStore.get(context)
@@ -83,24 +83,24 @@ object OwnerProfileStore {
     fun getVoiceSimilarityThreshold(context: Context): Float =
         SecureStore.get(context).getFloat(KEY_VOICE_THRESHOLD, DEFAULT_SIMILARITY_THRESHOLD)
 
-    /** Anthropic API key for the conversational chat mode ([com.owner.assistant.chat]). Encrypted at rest like everything else in this store — never logged, never sent anywhere but api.anthropic.com. */
-    fun setAnthropicApiKey(context: Context, apiKey: String) {
-        SecureStore.get(context).edit().putString(KEY_ANTHROPIC_API_KEY, apiKey.trim()).apply()
+    /** Gemini API key for the conversational chat mode ([com.owner.assistant.chat]). Encrypted at rest like everything else in this store — never logged, never sent anywhere but generativelanguage.googleapis.com. */
+    fun setGeminiApiKey(context: Context, apiKey: String) {
+        SecureStore.get(context).edit().putString(KEY_GEMINI_API_KEY, apiKey.trim()).apply()
     }
 
-    fun getAnthropicApiKey(context: Context): String? =
-        SecureStore.get(context).getString(KEY_ANTHROPIC_API_KEY, null)?.takeIf { it.isNotBlank() }
+    fun getGeminiApiKey(context: Context): String? =
+        SecureStore.get(context).getString(KEY_GEMINI_API_KEY, null)?.takeIf { it.isNotBlank() }
 
-    fun setAnthropicModel(context: Context, model: String) {
-        SecureStore.get(context).edit().putString(KEY_ANTHROPIC_MODEL, model.trim()).apply()
+    fun setGeminiModel(context: Context, model: String) {
+        SecureStore.get(context).edit().putString(KEY_GEMINI_MODEL, model.trim()).apply()
     }
 
-    fun getAnthropicModel(context: Context): String =
-        SecureStore.get(context).getString(KEY_ANTHROPIC_MODEL, DEFAULT_ANTHROPIC_MODEL)
-            ?.takeIf { it.isNotBlank() } ?: DEFAULT_ANTHROPIC_MODEL
+    fun getGeminiModel(context: Context): String =
+        SecureStore.get(context).getString(KEY_GEMINI_MODEL, DEFAULT_GEMINI_MODEL)
+            ?.takeIf { it.isNotBlank() } ?: DEFAULT_GEMINI_MODEL
 
     const val MIN_ENROLLMENT_SAMPLES = 3
     const val DEFAULT_WAKE_PHRASE = "hey assistant"
     const val DEFAULT_SIMILARITY_THRESHOLD = 0.82f
-    const val DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-5"
+    const val DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 }

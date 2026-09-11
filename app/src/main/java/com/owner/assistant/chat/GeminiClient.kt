@@ -1,6 +1,7 @@
 package com.owner.assistant.chat
 
 import android.content.Context
+import android.net.Uri
 import com.owner.assistant.data.OwnerProfileStore
 import org.json.JSONArray
 import org.json.JSONObject
@@ -9,26 +10,26 @@ import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 /**
- * Thin, dependency-free client for Anthropic's Messages API
- * (https://docs.anthropic.com/en/api/messages) — this is what makes the
+ * Thin, dependency-free client for Google's Gemini API
+ * (https://ai.google.dev/api/generate-content) — this is what makes the
  * assistant actually converse, versus the fixed-phrase commands in
- * [com.owner.assistant.service.CommandRouter]. Uses the owner's own API key
- * (set via [ChatActivity]'s settings dialog); nothing is bundled or shared —
- * every phone running this app calls Anthropic with its owner's own key and
- * pays for its own usage.
+ * [com.owner.assistant.service.CommandRouter]. Chosen over Anthropic's Claude
+ * API specifically because Google AI Studio issues API keys with a genuine
+ * free tier (rate-limited, no credit card required to start) — see README
+ * for the sign-up steps. Uses the owner's own key (set via [ChatActivity]'s
+ * settings dialog); nothing is bundled or shared.
  *
  * Blocking by design: every caller (a background thread in
  * [AssistantForegroundService][com.owner.assistant.service.AssistantForegroundService],
  * or an explicit background thread in [ChatActivity]) is already off the
  * main thread before calling this.
  */
-object AnthropicClient {
+object GeminiClient {
 
-    class ApiKeyMissingException : Exception("No Anthropic API key set")
+    class ApiKeyMissingException : Exception("No Gemini API key set")
 
-    private const val ENDPOINT = "https://api.anthropic.com/v1/messages"
-    private const val ANTHROPIC_VERSION = "2023-06-01"
-    private const val MAX_TOKENS = 1024
+    private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+    private const val MAX_OUTPUT_TOKENS = 1024
     private const val CONNECT_TIMEOUT_MS = 15_000
     private const val READ_TIMEOUT_MS = 30_000
 
@@ -44,24 +45,35 @@ object AnthropicClient {
 
     /** @throws ApiKeyMissingException if no key is configured. @throws IOException on any network/API failure. */
     fun sendMessageBlocking(context: Context, history: List<ChatMessage>): String {
-        val apiKey = OwnerProfileStore.getAnthropicApiKey(context) ?: throw ApiKeyMissingException()
-        val model = OwnerProfileStore.getAnthropicModel(context)
+        val apiKey = OwnerProfileStore.getGeminiApiKey(context) ?: throw ApiKeyMissingException()
+        val model = OwnerProfileStore.getGeminiModel(context)
 
-        val messagesJson = JSONArray()
+        val contents = JSONArray()
         history.forEach { message ->
-            messagesJson.put(JSONObject().put("role", message.role).put("content", message.content))
+            // Gemini uses "model" for the assistant's turns, not "assistant".
+            val role = if (message.role == "assistant") "model" else "user"
+            contents.put(
+                JSONObject()
+                    .put("role", role)
+                    .put("parts", JSONArray().put(JSONObject().put("text", message.content)))
+            )
         }
 
         val requestBody = JSONObject()
-            .put("model", model)
-            .put("max_tokens", MAX_TOKENS)
-            .put("system", SYSTEM_PROMPT)
-            .put("messages", messagesJson)
+            .put("contents", contents)
+            .put(
+                "systemInstruction",
+                JSONObject().put("parts", JSONArray().put(JSONObject().put("text", SYSTEM_PROMPT)))
+            )
+            .put("generationConfig", JSONObject().put("maxOutputTokens", MAX_OUTPUT_TOKENS))
 
-        val connection = (URL(ENDPOINT).openConnection() as HttpsURLConnection).apply {
+        val url = Uri.parse("$BASE_URL/$model:generateContent")
+            .buildUpon()
+            .appendQueryParameter("key", apiKey)
+            .build()
+
+        val connection = (URL(url.toString()).openConnection() as HttpsURLConnection).apply {
             requestMethod = "POST"
-            setRequestProperty("x-api-key", apiKey)
-            setRequestProperty("anthropic-version", ANTHROPIC_VERSION)
             setRequestProperty("content-type", "application/json")
             doOutput = true
             connectTimeout = CONNECT_TIMEOUT_MS
@@ -79,14 +91,19 @@ object AnthropicClient {
                 val apiMessage = runCatching {
                     JSONObject(responseText).optJSONObject("error")?.optString("message")
                 }.getOrNull()
-                throw IOException("Claude API error (${connection.responseCode}): ${apiMessage ?: responseText.take(200)}")
+                throw IOException("Gemini API error (${connection.responseCode}): ${apiMessage ?: responseText.take(200)}")
             }
 
-            val content = JSONObject(responseText).getJSONArray("content")
+            val candidates = JSONObject(responseText).optJSONArray("candidates")
+            val firstCandidate = candidates?.optJSONObject(0)
+                ?: throw IOException("Gemini returned no candidates (it may have blocked the response for safety)")
+            val parts = firstCandidate.optJSONObject("content")?.optJSONArray("parts")
+
             val text = StringBuilder()
-            for (i in 0 until content.length()) {
-                val block = content.getJSONObject(i)
-                if (block.optString("type") == "text") text.append(block.optString("text"))
+            if (parts != null) {
+                for (i in 0 until parts.length()) {
+                    text.append(parts.optJSONObject(i)?.optString("text") ?: "")
+                }
             }
             return text.toString().ifBlank { "..." }
         } finally {

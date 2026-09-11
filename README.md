@@ -5,8 +5,8 @@ owner's voice** and acts as a personal command center: messaging readout,
 call control, camera, phone lock, a permissions/behavior security advisor,
 local ad blocking, a speech translator, emergency alerts, battery/data
 monitoring, scheduled Do Not Disturb, and reminders — plus a real
-conversational chat mode (text or voice, powered by the Claude API with your
-own key) for anything that isn't one of those fixed commands.
+conversational chat mode (text or voice, powered by Google's Gemini API with
+your own free-tier key) for anything that isn't one of those fixed commands.
 
 This is a single-user, sideloaded app — not a public product. See
 `personal-ai-assistant-blueprint.md` (the original spec this was built from)
@@ -35,7 +35,7 @@ the relevant class.
 | Battery/data monitor | `service/BatteryDataMonitor.kt` | `UsageStatsManager`-based (see limitations) |
 | Scheduled DND | `service/DndScheduler.kt` | Sleep-window alarms + optional calendar check |
 | Onboarding | `onboarding/OnboardingActivity.kt` | Walks through every permission that can't be auto-granted |
-| Chat mode | `chat/` | Real conversation via the Anthropic Messages API — text/voice screen (`ChatActivity`) plus a fallback from voice commands that don't match a fixed phrase (`AssistantChat`) |
+| Chat mode | `chat/` | Real conversation via Google's Gemini API (free tier) — text/voice screen (`ChatActivity`) plus a fallback from voice commands that don't match a fixed phrase (`AssistantChat`) |
 
 ## Architecture
 
@@ -115,15 +115,20 @@ walks through, in order:
 ### Setting up chat mode
 
 Chat mode doesn't need any of the setup above — open **Chat** from the main
-screen any time. The first time, it asks for an Anthropic API key:
+screen any time. The first time, it asks for a Gemini API key:
 
-1. Get a key from [console.anthropic.com](https://console.anthropic.com)
-   (this is billed to your own Anthropic account per message — it is not
-   free, though a personal-use chat volume is typically inexpensive).
+1. Go to [aistudio.google.com/apikey](https://aistudio.google.com/apikey),
+   sign in with a Google account, and click **Create API key**. This is
+   Google AI Studio's **free tier** — no credit card required to start.
+   It's rate-limited (fewer requests per minute/day than the paid tier), and
+   Google can change those limits at any time — see
+   [ai.google.dev/pricing](https://ai.google.dev/pricing) for the current
+   numbers — but ordinary personal chat use fits comfortably inside it.
 2. Paste it into the dialog (or tap **API key** in the chat screen's header
-   later to change it or the model ID). It's stored the same way as the
-   voice profile and emergency contact — encrypted, on-device only, never
-   sent anywhere but `api.anthropic.com`.
+   later to change it or the model ID — defaults to `gemini-2.5-flash`).
+   It's stored the same way as the voice profile and emergency contact —
+   encrypted, on-device only, never sent anywhere but
+   `generativelanguage.googleapis.com`.
 3. Type or hold the 🎤 button to talk; replies show on screen and are
    spoken aloud. Tap **Voice** in the header to browse and preview the
    voices your device has installed and pin the one you want — see "Known
@@ -131,10 +136,15 @@ screen any time. The first time, it asks for an Anthropic API key:
 
 Once a key is set, the always-listening wake-word assistant also uses it:
 any command that doesn't match one of the fixed phrases above (reminders,
-camera, etc.) gets sent to Claude instead of being silently ignored, so you
+camera, etc.) gets sent to Gemini instead of being silently ignored, so you
 can just talk to it. Both the chat screen and voice fall-through share the
 same conversation history (in memory only, up to the last 20 messages —
 cleared on app restart, not synced anywhere).
+
+Note: if Google renames or retires `gemini-2.5-flash` after this was
+written, the chat screen will show the exact API error — just change the
+model ID in the **API key** dialog to whatever Google AI Studio currently
+lists, no new APK needed.
 
 ## Known limitations (please read before relying on this)
 
@@ -172,7 +182,7 @@ cleared on app restart, not synced anywhere).
   "every language in the world" — Google's engine (the usual default) covers
   on the order of 40-50 languages with installed voice packs. Chat replies
   are passed through ML Kit language detection first (`speakAuto`) so
-  whatever language Claude actually replies in gets matched to the closest
+  whatever language Gemini actually replies in gets matched to the closest
   installed voice/locale automatically, rather than always speaking English.
 - **Ad blocking scope.** `vpn/AdBlockVpnService.kt` intercepts and filters
   only DNS lookups (by routing just the device's configured DNS server

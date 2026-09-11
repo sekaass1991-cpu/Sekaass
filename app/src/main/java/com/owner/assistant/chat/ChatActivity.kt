@@ -25,10 +25,12 @@ import kotlin.concurrent.thread
 /**
  * The "controllable, talks like ChatGPT/Claude" screen: type or hold the mic
  * button to talk, see the conversation on screen, hear replies spoken back.
- * This is a manual front-end onto the same [AnthropicClient] and
+ * This is a manual front-end onto the same [GeminiClient] and
  * [ChatHistoryStore] that voice commands fall through to from
  * [com.owner.assistant.service.CommandRouter] when they don't match a fixed
- * phone-control phrase — so the two stay in the same conversation.
+ * phone-control phrase — so the two stay in the same conversation. Uses
+ * Google's Gemini API rather than a paid-only provider specifically because
+ * Google AI Studio issues free-tier keys (see README).
  */
 class ChatActivity : AppCompatActivity() {
 
@@ -64,7 +66,7 @@ class ChatActivity : AppCompatActivity() {
         setContentView(root)
 
         renderHistory()
-        if (OwnerProfileStore.getAnthropicApiKey(this) == null) {
+        if (OwnerProfileStore.getGeminiApiKey(this) == null) {
             showApiKeyDialog(initialSetup = true)
         }
     }
@@ -129,19 +131,19 @@ class ChatActivity : AppCompatActivity() {
 
         thread {
             try {
-                val reply = AnthropicClient.sendMessageBlocking(this, ChatHistoryStore.all())
+                val reply = GeminiClient.sendMessageBlocking(this, ChatHistoryStore.all())
                 ChatHistoryStore.add("assistant", reply)
                 runOnUiThread {
                     thinkingBubble.text = reply
                     SpeechOutput.speakAuto(reply)
                 }
-            } catch (e: AnthropicClient.ApiKeyMissingException) {
+            } catch (e: GeminiClient.ApiKeyMissingException) {
                 runOnUiThread {
                     thinkingBubble.text = "No API key set — tap \"API key\" above to add one."
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    thinkingBubble.text = "Couldn't reach Claude: ${e.message ?: "unknown error"}"
+                    thinkingBubble.text = "Couldn't reach Gemini: ${e.message ?: "unknown error"}"
                 }
             }
         }
@@ -305,31 +307,31 @@ class ChatActivity : AppCompatActivity() {
             setPadding(48, 32, 48, 0)
         }
         val keyInput = EditText(this).apply {
-            hint = "Anthropic API key (sk-ant-...)"
-            setText(OwnerProfileStore.getAnthropicApiKey(this@ChatActivity) ?: "")
+            hint = "Gemini API key (AIza...)"
+            setText(OwnerProfileStore.getGeminiApiKey(this@ChatActivity) ?: "")
         }
         val modelInput = EditText(this).apply {
             hint = "Model ID"
-            setText(OwnerProfileStore.getAnthropicModel(this@ChatActivity))
+            setText(OwnerProfileStore.getGeminiModel(this@ChatActivity))
         }
         layout.addView(TextView(this).apply {
             text = if (initialSetup) {
-                "Add your Anthropic API key to enable real conversation. Get one at console.anthropic.com — usage is billed to your own account, not free."
+                "Add a free Gemini API key to enable real conversation. Get one at aistudio.google.com/apikey — free tier, no credit card needed (rate-limited)."
             } else {
-                "Update your Anthropic API key or model."
+                "Update your Gemini API key or model."
             }
         })
         layout.addView(keyInput)
         layout.addView(modelInput)
 
         AlertDialog.Builder(this)
-            .setTitle("Claude API settings")
+            .setTitle("Gemini API settings")
             .setView(layout)
             .setPositiveButton("Save") { _, _ ->
                 val key = keyInput.text.toString().trim()
                 val model = modelInput.text.toString().trim()
-                if (key.isNotBlank()) OwnerProfileStore.setAnthropicApiKey(this, key)
-                if (model.isNotBlank()) OwnerProfileStore.setAnthropicModel(this, model)
+                if (key.isNotBlank()) OwnerProfileStore.setGeminiApiKey(this, key)
+                if (model.isNotBlank()) OwnerProfileStore.setGeminiModel(this, model)
             }
             .setNegativeButton("Cancel", null)
             .setCancelable(!initialSetup)
