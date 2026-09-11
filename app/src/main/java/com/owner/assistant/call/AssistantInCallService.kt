@@ -1,5 +1,6 @@
 package com.owner.assistant.call
 
+import android.content.Intent
 import android.provider.ContactsContract
 import android.telecom.Call
 import android.telecom.InCallService
@@ -7,13 +8,16 @@ import android.util.Log
 import com.owner.assistant.util.SpeechOutput
 
 /**
- * Feature A (call control): registering this as an InCallService (the owner
- * enables it once via Settings > Apps > Default apps > "Assistant call
- * screening/companion" role prompt, or via RoleManager) lets the assistant
- * see and control calls without becoming the full default dialer.
+ * Feature A (call control): Android only binds an InCallService for real
+ * phone calls to the phone's default Dialer app (or a car-mode companion) —
+ * there is no lighter-weight role for this. So this app registers as the
+ * default dialer ([android.app.role.RoleManager.ROLE_DIALER], requested
+ * during onboarding), and [InCallActivity] is the calling screen that comes
+ * with that responsibility.
  *
- * On a ringing call it announces the caller by voice; "answer" / "decline" /
- * "mute the call" commands are routed here through [CallControlBus].
+ * On a ringing call it announces the caller by voice AND launches
+ * [InCallActivity] for touch control; "answer" / "decline" / "mute the
+ * call" commands are routed here through [CallControlBus] either way.
  */
 class AssistantInCallService : InCallService() {
 
@@ -29,6 +33,15 @@ class AssistantInCallService : InCallService() {
         CallControlBus.bindService(this)
         call.registerCallback(callback)
         if (call.state == Call.STATE_RINGING) announceCaller(call)
+        launchInCallScreen()
+    }
+
+    private fun launchInCallScreen() {
+        startActivity(
+            Intent(this, InCallActivity::class.java).addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            )
+        )
     }
 
     override fun onCallRemoved(call: Call) {

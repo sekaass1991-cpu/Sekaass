@@ -18,6 +18,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.owner.assistant.R
 import com.owner.assistant.data.OwnerProfileStore
 import com.owner.assistant.util.SpeechOutput
 import kotlin.concurrent.thread
@@ -48,13 +50,14 @@ class ChatActivity : AppCompatActivity() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            setBackgroundColor(ContextCompat.getColor(this@ChatActivity, R.color.background))
         }
 
         root.addView(buildHeader())
 
         messagesContainer = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(24, 24, 24, 24)
+            setPadding(24, 32, 24, 24)
         }
         scrollView = ScrollView(this).apply {
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
@@ -74,47 +77,88 @@ class ChatActivity : AppCompatActivity() {
     private fun buildHeader(): LinearLayout {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(32, 48, 32, 16)
+            setPadding(32, 72, 24, 24)
             gravity = Gravity.CENTER_VERTICAL
+            setBackgroundColor(ContextCompat.getColor(this@ChatActivity, R.color.primary))
         }
-        row.addView(TextView(this).apply {
-            text = "Chat"
-            textSize = 20f
+        row.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            addView(TextView(this@ChatActivity).apply {
+                text = "Personal Assistant"
+                textSize = 18f
+                setTextColor(Color.WHITE)
+            })
+            addView(TextView(this@ChatActivity).apply {
+                text = "Chat"
+                textSize = 13f
+                setTextColor(Color.parseColor("#D8D4FF"))
+            })
         })
-        row.addView(Button(this).apply {
-            text = "Voice"
-            setOnClickListener { showVoicePickerDialog() }
-        })
-        row.addView(Button(this).apply {
-            text = "API key"
-            setOnClickListener { showApiKeyDialog(initialSetup = false) }
-        })
+        row.addView(headerIconButton("Voice") { showVoicePickerDialog() })
+        row.addView(headerIconButton("API key") { showApiKeyDialog(initialSetup = false) })
         return row
     }
 
+    private fun headerIconButton(label: String, action: () -> Unit) = TextView(this).apply {
+        text = label
+        textSize = 13f
+        setTextColor(Color.WHITE)
+        isClickable = true
+        isFocusable = true
+        setPadding(20, 12, 20, 12)
+        val outValue = android.util.TypedValue()
+        theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+        setBackgroundResource(outValue.resourceId)
+        setOnClickListener { action() }
+    }
+
     private fun buildInputRow(): LinearLayout {
-        val row = LinearLayout(this).apply {
+        val outer = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(16, 16, 16, 16)
+            setPadding(24, 16, 24, 24)
             gravity = Gravity.CENTER_VERTICAL
         }
+
+        val pill = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            background = ContextCompat.getDrawable(this@ChatActivity, R.drawable.bg_input_pill)
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply {
+                marginEnd = 16
+            }
+        }
         input = EditText(this).apply {
-            hint = "Type a message..."
+            hint = "Message..."
+            setBackgroundColor(Color.TRANSPARENT)
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
         }
+        pill.addView(input)
+
         micButton = Button(this).apply {
-            text = "🎤" // microphone emoji
+            text = "🎤"
+            background = ContextCompat.getDrawable(this@ChatActivity, R.drawable.bg_circle_accent)
+            setTextColor(Color.WHITE)
+            minWidth = 0
+            minimumWidth = 0
+            setPadding(20, 20, 20, 20)
             setOnClickListener { toggleVoiceInput() }
         }
+        pill.addView(micButton)
+
         val sendButton = Button(this).apply {
-            text = "Send"
+            text = "➤"
+            background = ContextCompat.getDrawable(this@ChatActivity, R.drawable.bg_circle_primary)
+            setTextColor(Color.WHITE)
+            minWidth = 0
+            minimumWidth = 0
+            setPadding(20, 20, 20, 20)
             setOnClickListener { sendTypedMessage() }
         }
-        row.addView(input)
-        row.addView(micButton)
-        row.addView(sendButton)
-        return row
+
+        outer.addView(pill)
+        outer.addView(sendButton)
+        return outer
     }
 
     private fun sendTypedMessage() {
@@ -150,16 +194,22 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun addBubble(role: String, text: String): TextView {
+        val isUser = role == "user"
         val bubble = TextView(this).apply {
             this.text = text
-            setPadding(24, 16, 24, 16)
-            setBackgroundColor(if (role == "user") Color.parseColor("#DDE6FF") else Color.parseColor("#EEEEEE"))
-            setTextColor(Color.BLACK)
+            textSize = 15f
+            background = ContextCompat.getDrawable(
+                this@ChatActivity, if (isUser) R.drawable.bg_bubble_user else R.drawable.bg_bubble_assistant
+            )
+            setTextColor(ContextCompat.getColor(this@ChatActivity, if (isUser) R.color.bubble_user_text else R.color.bubble_assistant_text))
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            maxWidth = (resources.displayMetrics.widthPixels * 0.78).toInt()
         }
         val wrapper = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = if (role == "user") Gravity.END else Gravity.START
+            gravity = if (isUser) Gravity.END else Gravity.START
             setPadding(0, 8, 0, 8)
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             addView(bubble)
         }
         messagesContainer.addView(wrapper)

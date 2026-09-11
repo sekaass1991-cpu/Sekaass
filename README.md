@@ -27,7 +27,7 @@ the relevant class.
 | Notification readout | `service/NotificationReaderService.kt` | Filters known messaging apps, queues in-memory only |
 | Camera | `camera/CameraController.kt` | CameraX, headless foreground service, saves to app-private storage |
 | Phone lock | `call/PhoneLocker.kt` | Device Admin API |
-| Call control | `call/AssistantInCallService.kt` | `InCallService` + `RoleManager.ROLE_CALL_SCREENING` |
+| Call control | `call/` | `InCallService` bound via the default-Dialer role (`RoleManager.ROLE_DIALER`) — the only way Android grants this; includes `InCallActivity` (calling screen) and `DialerActivity` (minimal dial pad) since being the default dialer requires providing both |
 | Emergency mode | `emergency/` | Location + SMS alert + silent audio recording + shake trigger |
 | Security watchdog | `security/` | Permission-heuristic advisor, daily `WorkManager` scan |
 | Ad blocking | `vpn/` | Local DNS sinkhole via `VpnService` (see limitations) |
@@ -52,6 +52,15 @@ the relevant class.
   `EncryptedSharedPreferences` for anything owner-identifying (voice
   embeddings, emergency contact). Nothing is synced off-device. Non-sensitive
   settings (sleep schedule, etc.) live in plain prefs via `data/AssistantPrefs.kt`.
+- **Design system**: a small shared palette (`res/values/colors.xml`, with a
+  `values-night/` dark variant) and shape-drawable resources
+  (`res/drawable/bg_*.xml` — rounded buttons/bubbles/cards/pills) applied
+  across `MainActivity`, `OnboardingActivity`, `ChatActivity`, and
+  `InCallActivity` via `Theme.PersonalAssistant`
+  (`res/values/styles.xml`, `Theme.MaterialComponents.DayNight`). All screens
+  are still built programmatically (no XML layouts), matching the rest of
+  the codebase's style, just with consistent colors/shapes instead of
+  default widget styling.
 
 ## Building
 
@@ -101,16 +110,26 @@ Open the app and go through **Start setup** (`OnboardingActivity`). It
 walks through, in order:
 
 1. Runtime permissions (mic, camera, location, phone, SMS, contacts, calendar).
-2. Notification access (Settings — for message readout).
-3. Device Admin (Settings — for phone lock).
-4. Do Not Disturb access (Settings — for scheduled DND).
-5. Usage access (Settings — for the security scan and usage summary).
-6. The one-time local VPN consent dialog (for ad blocking).
-7. The call-screening role (for call control).
-8. **Voice enrollment** — record 3 short samples. The assistant will not
+2. **Battery optimization exemption** — without this, Android eventually
+   pauses the wake-word listener in the background, same as any always-on
+   voice assistant needs.
+3. Notification access (Settings — for message readout).
+4. Device Admin (Settings — for phone lock).
+5. Do Not Disturb access (Settings — for scheduled DND).
+6. Usage access (Settings — for the security scan and usage summary).
+7. The one-time local VPN consent dialog (for ad blocking).
+8. **Default Dialer role** (for call control) — see "Known limitations" for
+   why this is required, not optional, for answer/decline/mute to work.
+9. **Voice enrollment** — record 3 short samples. The assistant will not
    start, and `BootReceiver` will not restart it after a reboot, until this
    is done — nothing should ever act on a voice it hasn't verified.
-9. Emergency contact number.
+10. Emergency contact number.
+
+The assistant starts running in the background automatically the moment
+setup finishes — there's no separate "turn it on" step, the same as Google
+Assistant is just always listening once it's set up. `MainActivity` still
+has manual **Start assistant** / **Stop assistant** buttons if you want to
+toggle it later.
 
 ### Setting up chat mode
 
@@ -201,10 +220,21 @@ lists, no new APK needed.
   malware scanner — see `security/PermissionHeuristics.kt` for the exact
   rules. Expect false positives; it's meant to prompt the owner to look, not
   to be an automatic verdict.
-- **Call control** requires the owner to grant the Call Screening role
-  (`RoleManager.ROLE_CALL_SCREENING`), not full default-dialer status — this
-  keeps the ask smaller but is why answer/decline/mute go through
-  `InCallService.Call` rather than `TelecomManager` directly.
+- **Call control requires becoming the default Dialer app — there is no
+  lighter-weight option.** An earlier version of this app requested
+  `RoleManager.ROLE_CALL_SCREENING`, which sounds related but isn't: that
+  role only lets an app silently allow/block a call *before it rings*
+  (`CallScreeningService`) — it has nothing to do with the `InCallService`
+  binding that "answer"/"decline"/"mute" actually need. Android only binds
+  `InCallService` for real phone calls to the phone's default Dialer app (or
+  a car-mode companion) — this is a deliberate anti-spyware restriction, not
+  something a lighter permission can unlock. So `call/AssistantInCallService.kt`
+  only receives calls once the owner grants `RoleManager.ROLE_DIALER` during
+  onboarding, and the app ships `InCallActivity` (a minimal but real calling
+  screen — caller name, answer/decline/mute/end) and `DialerActivity` (a bare
+  number pad, required for `ROLE_DIALER` eligibility) so becoming the default
+  dialer doesn't cost the owner the ability to see or touch-answer a call.
+  This is reversible any time in Settings → Apps → Default apps → Phone app.
 - This sandbox has no Android SDK, so `./gradlew assembleDebug` could not
   actually be run to confirm a clean build — do that first in Android
   Studio.

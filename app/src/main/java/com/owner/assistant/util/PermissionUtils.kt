@@ -6,7 +6,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.VpnService
+import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
+import android.telecom.TelecomManager
 import com.owner.assistant.call.PhoneAdminReceiver
 
 /**
@@ -45,5 +48,22 @@ object PermissionUtils {
     fun isNotificationPolicyAccessGranted(context: Context): Boolean {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         return manager.isNotificationPolicyAccessGranted
+    }
+
+    /** Exempt from Doze/App Standby — without this, Android eventually pauses the wake-word listener in the background. */
+    fun isIgnoringBatteryOptimizations(context: Context): Boolean {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+    }
+
+    /** True once this app is the default Dialer — required before InCallService (call control) receives any calls at all. */
+    fun isDefaultDialer(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = context.getSystemService(android.app.role.RoleManager::class.java)
+            roleManager?.isRoleHeld(android.app.role.RoleManager.ROLE_DIALER) == true
+        } else {
+            val telecomManager = context.getSystemService(TelecomManager::class.java)
+            telecomManager?.defaultDialerPackage == context.packageName
+        }
     }
 }
