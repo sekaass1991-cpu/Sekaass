@@ -90,6 +90,11 @@
             android:name=".onboarding.OnboardingActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".chat.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Always-on foreground service: wake word + command routing -->
         <service
             android:name=".service.AssistantForegroundService"

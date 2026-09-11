@@ -7,6 +7,7 @@ import android.util.Log
 import com.owner.assistant.call.CallControlBus
 import com.owner.assistant.call.PhoneLocker
 import com.owner.assistant.camera.CameraController
+import com.owner.assistant.chat.AssistantChat
 import com.owner.assistant.data.MessageStore
 import com.owner.assistant.emergency.EmergencyHandler
 import com.owner.assistant.security.SecurityWatchdog
@@ -85,7 +86,10 @@ class CommandRouter(private val context: Context) {
             text.contains("stop translating") || text.contains("stop translation") ->
                 Translator(context).stopSession()
 
-            else -> Log.d("CommandRouter", "No matching handler for: $text")
+            // Nothing matched a fixed phrase — hand it to the real conversational
+            // layer instead of just logging and going silent. This is what lets
+            // the owner ask an open-ended question by voice, not just issue commands.
+            else -> AssistantChat.respondTo(context, command.trim())
         }
     }
 

@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.owner.assistant.chat.ChatActivity
 import com.owner.assistant.data.OwnerProfileStore
 import com.owner.assistant.onboarding.OnboardingActivity
 import com.owner.assistant.service.AssistantForegroundService
@@ -48,6 +49,11 @@ class MainActivity : AppCompatActivity() {
                 "Setup isn't finished yet — the assistant won't start until your voice profile is enrolled."
             }
             setPadding(0, 0, 0, 32)
+        })
+
+        layout.addView(Button(this).apply {
+            text = "Open Chat"
+            setOnClickListener { startActivity(Intent(this@MainActivity, ChatActivity::class.java)) }
         })
 
         layout.addView(Button(this).apply {

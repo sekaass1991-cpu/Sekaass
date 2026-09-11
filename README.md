@@ -4,7 +4,9 @@ A private, wake-word-activated Android assistant that responds **only to the
 owner's voice** and acts as a personal command center: messaging readout,
 call control, camera, phone lock, a permissions/behavior security advisor,
 local ad blocking, a speech translator, emergency alerts, battery/data
-monitoring, scheduled Do Not Disturb, and reminders.
+monitoring, scheduled Do Not Disturb, and reminders — plus a real
+conversational chat mode (text or voice, powered by the Claude API with your
+own key) for anything that isn't one of those fixed commands.
 
 This is a single-user, sideloaded app — not a public product. See
 `personal-ai-assistant-blueprint.md` (the original spec this was built from)
@@ -33,6 +35,7 @@ the relevant class.
 | Battery/data monitor | `service/BatteryDataMonitor.kt` | `UsageStatsManager`-based (see limitations) |
 | Scheduled DND | `service/DndScheduler.kt` | Sleep-window alarms + optional calendar check |
 | Onboarding | `onboarding/OnboardingActivity.kt` | Walks through every permission that can't be auto-granted |
+| Chat mode | `chat/` | Real conversation via the Anthropic Messages API — text/voice screen (`ChatActivity`) plus a fallback from voice commands that don't match a fixed phrase (`AssistantChat`) |
 
 ## Architecture
 
@@ -108,6 +111,28 @@ walks through, in order:
    start, and `BootReceiver` will not restart it after a reboot, until this
    is done — nothing should ever act on a voice it hasn't verified.
 9. Emergency contact number.
+
+### Setting up chat mode
+
+Chat mode doesn't need any of the setup above — open **Chat** from the main
+screen any time. The first time, it asks for an Anthropic API key:
+
+1. Get a key from [console.anthropic.com](https://console.anthropic.com)
+   (this is billed to your own Anthropic account per message — it is not
+   free, though a personal-use chat volume is typically inexpensive).
+2. Paste it into the dialog (or tap **API key** in the chat screen's header
+   later to change it or the model ID). It's stored the same way as the
+   voice profile and emergency contact — encrypted, on-device only, never
+   sent anywhere but `api.anthropic.com`.
+3. Type or hold the 🎤 button to talk; replies show on screen and are
+   spoken aloud.
+
+Once a key is set, the always-listening wake-word assistant also uses it:
+any command that doesn't match one of the fixed phrases above (reminders,
+camera, etc.) gets sent to Claude instead of being silently ignored, so you
+can just talk to it. Both the chat screen and voice fall-through share the
+same conversation history (in memory only, up to the last 20 messages —
+cleared on app restart, not synced anywhere).
 
 ## Known limitations (please read before relying on this)
 
