@@ -29,7 +29,7 @@ object AssistantChat {
         try {
             val reply = AnthropicClient.sendMessageBlocking(context, ChatHistoryStore.all())
             ChatHistoryStore.add("assistant", reply)
-            SpeechOutput.speak(reply)
+            SpeechOutput.speakAuto(reply)
         } catch (e: Exception) {
             Log.e(TAG, "Claude request failed", e)
             SpeechOutput.speak("I couldn't reach the assistant service. Please check your internet connection or API key.")

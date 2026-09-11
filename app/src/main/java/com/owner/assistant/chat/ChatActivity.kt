@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.speech.tts.Voice
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.Button
@@ -80,6 +81,10 @@ class ChatActivity : AppCompatActivity() {
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
         })
         row.addView(Button(this).apply {
+            text = "Voice"
+            setOnClickListener { showVoicePickerDialog() }
+        })
+        row.addView(Button(this).apply {
             text = "API key"
             setOnClickListener { showApiKeyDialog(initialSetup = false) }
         })
@@ -128,7 +133,7 @@ class ChatActivity : AppCompatActivity() {
                 ChatHistoryStore.add("assistant", reply)
                 runOnUiThread {
                     thinkingBubble.text = reply
-                    SpeechOutput.speak(reply)
+                    SpeechOutput.speakAuto(reply)
                 }
             } catch (e: AnthropicClient.ApiKeyMissingException) {
                 runOnUiThread {
@@ -212,6 +217,88 @@ class ChatActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Android's TTS API has no reliable, documented "gender" field, so
+     * [SpeechOutput] only auto-picks a female-sounding voice when the
+     * engine's own voice names hint at it. This picker is the guaranteed
+     * way to actually get the voice you want: browse, preview, and pin one.
+     */
+    private fun showVoicePickerDialog() {
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 16, 48, 0)
+        }
+        layout.addView(TextView(this).apply {
+            text = "Filter by language code (e.g. en, ta, hi, es, fr) — blank shows your device's language."
+        })
+        val filterInput = EditText(this).apply { hint = "Language code" }
+        layout.addView(filterInput)
+
+        val resultsContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+
+        fun renderVoices(languageFilter: String) {
+            resultsContainer.removeAllViews()
+            val effectiveFilter = languageFilter.ifBlank { java.util.Locale.getDefault().language }
+            val matches = SpeechOutput.availableVoices()
+                .filter { it.locale.language.equals(effectiveFilter, ignoreCase = true) && !it.isNetworkConnectionRequired }
+                .sortedBy { it.name }
+                .take(MAX_VOICE_RESULTS)
+
+            if (matches.isEmpty()) {
+                resultsContainer.addView(TextView(this).apply {
+                    text = "No installed voices found for \"$effectiveFilter\". Try a different code, or leave it blank."
+                })
+                return
+            }
+            matches.forEach { voice -> resultsContainer.addView(buildVoiceRow(voice)) }
+        }
+
+        filterInput.setOnEditorActionListener { _, _, _ ->
+            renderVoices(filterInput.text.toString().trim())
+            true
+        }
+        layout.addView(Button(this).apply {
+            text = "Search"
+            setOnClickListener { renderVoices(filterInput.text.toString().trim()) }
+        })
+        layout.addView(ScrollView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 800)
+            addView(resultsContainer)
+        })
+
+        renderVoices("")
+
+        AlertDialog.Builder(this)
+            .setTitle("Choose a voice")
+            .setView(layout)
+            .setNegativeButton("Close", null)
+            .show()
+    }
+
+    private fun buildVoiceRow(voice: Voice): LinearLayout {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, 8, 0, 8)
+        }
+        row.addView(TextView(this).apply {
+            text = "${voice.locale.displayName}\n${voice.name}"
+            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+        })
+        row.addView(Button(this).apply {
+            text = "▶"
+            setOnClickListener { SpeechOutput.previewVoice(voice) }
+        })
+        row.addView(Button(this).apply {
+            text = "Use"
+            setOnClickListener {
+                SpeechOutput.setPreferredVoice(this@ChatActivity, voice)
+                Toast.makeText(this@ChatActivity, "Using this voice from now on", Toast.LENGTH_SHORT).show()
+            }
+        })
+        return row
+    }
+
     private fun showApiKeyDialog(initialSetup: Boolean) {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -263,5 +350,6 @@ class ChatActivity : AppCompatActivity() {
 
     companion object {
         private const val RECORD_AUDIO_REQUEST_CODE = 2001
+        private const val MAX_VOICE_RESULTS = 30
     }
 }

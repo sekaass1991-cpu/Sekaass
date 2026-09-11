@@ -125,7 +125,9 @@ screen any time. The first time, it asks for an Anthropic API key:
    voice profile and emergency contact — encrypted, on-device only, never
    sent anywhere but `api.anthropic.com`.
 3. Type or hold the 🎤 button to talk; replies show on screen and are
-   spoken aloud.
+   spoken aloud. Tap **Voice** in the header to browse and preview the
+   voices your device has installed and pin the one you want — see "Known
+   limitations" for why this isn't a single automatic toggle.
 
 Once a key is set, the always-listening wake-word assistant also uses it:
 any command that doesn't match one of the fixed phrases above (reminders,
@@ -158,6 +160,20 @@ cleared on app restart, not synced anywhere).
   through a cloud API (e.g. Google Cloud Translation) instead of ML Kit's
   on-device model — a real trade-off (network dependency, cost), so it's
   left as a follow-up rather than silently faked.
+- **"Girl voice" and "every language" for spoken replies.** `util/SpeechOutput.kt`
+  does two honest best-effort things rather than promising more than Android
+  can deliver: (1) Android's TTS API has no documented voice-gender field —
+  there is no reliable cross-device way to say "always use a female voice."
+  It auto-picks a female-sounding voice when the installed engine's own voice
+  names hint at it (works for many of Google TTS's classic per-language
+  voices), and the chat screen's **Voice** button lets you browse, preview,
+  and pin an exact voice per language if the auto-pick isn't right — that's
+  the guaranteed way to get the voice you want. (2) No TTS engine speaks
+  "every language in the world" — Google's engine (the usual default) covers
+  on the order of 40-50 languages with installed voice packs. Chat replies
+  are passed through ML Kit language detection first (`speakAuto`) so
+  whatever language Claude actually replies in gets matched to the closest
+  installed voice/locale automatically, rather than always speaking English.
 - **Ad blocking scope.** `vpn/AdBlockVpnService.kt` intercepts and filters
   only DNS lookups (by routing just the device's configured DNS server
   IP(s) through the tunnel) — it does not proxy general traffic, which

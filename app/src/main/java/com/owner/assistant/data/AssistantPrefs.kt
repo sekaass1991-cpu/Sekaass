@@ -17,6 +17,7 @@ object AssistantPrefs {
     private const val KEY_SLEEP_END_MINUTE = "sleep_end_minute"
     private const val KEY_SLEEP_DND_ENABLED = "sleep_dnd_enabled"
     private const val KEY_CALENDAR_DND_ENABLED = "calendar_dnd_enabled"
+    private const val KEY_PREFERRED_VOICE_NAME = "preferred_tts_voice_name"
 
     private fun prefs(context: Context) =
         context.applicationContext.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)
@@ -54,4 +55,12 @@ object AssistantPrefs {
 
     fun isCalendarDndEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_CALENDAR_DND_ENABLED, false)
+
+    /** The exact TTS engine voice name the owner picked in the chat screen's voice picker, if any. */
+    fun setPreferredVoiceName(context: Context, voiceName: String) {
+        prefs(context).edit().putString(KEY_PREFERRED_VOICE_NAME, voiceName).apply()
+    }
+
+    fun getPreferredVoiceName(context: Context): String? =
+        prefs(context).getString(KEY_PREFERRED_VOICE_NAME, null)
 }
