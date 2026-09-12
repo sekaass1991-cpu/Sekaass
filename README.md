@@ -69,10 +69,28 @@ the relevant class.
 ```
 
 Requires the Android SDK (compileSdk 34) and a JDK 17. This sandbox doesn't
-have the Android SDK installed, so the build could not be run here — the
-Gradle wrapper is included and every file was written and manually
-cross-checked (imports, package layout, API usage) for consistency, but
-please do a first build in Android Studio before relying on it.
+have the Android SDK installed, so the debug APK itself is built and
+verified on every push by the `.github/workflows/build-apk.yml` GitHub
+Actions workflow instead — see the Actions tab of this repo for the latest
+build.
+
+### Tests
+
+```
+./gradlew testDebugUnitTest
+```
+
+Real, runnable JUnit tests for the parts of the app that don't need an
+Android device — `voice/AudioFeatureExtractorTest.kt` (the MFCC voice-match
+pipeline: identical audio matches itself, different tones are less similar,
+degenerate inputs don't crash), `vpn/DnsPacketProcessorTest.kt` (hand-builds
+real IPv4/UDP/DNS packets and checks parsing + the blocked-response
+construction byte-for-byte), and `security/PermissionHeuristicsTest.kt` (the
+watchdog's rule set against synthetic app permission profiles). These run in
+CI on every push alongside the APK build. Everything that genuinely needs a
+device or emulator (onboarding flow, wake word, camera, calls, the VPN
+tunnel itself) can't be automated here and needs manual testing on a real
+phone.
 
 Because of how many special-access permissions this app uses (Notification
 Listener, Device Admin, VPN, call screening), **it must be sideloaded** —

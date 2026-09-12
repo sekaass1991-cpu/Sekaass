@@ -63,4 +63,9 @@ dependencies {
     // Models download on first use over Wi-Fi; see README for offline model management.
     implementation("com.google.mlkit:translate:17.0.3")
     implementation("com.google.mlkit:language-id:17.0.6")
+
+    // Unit tests for pure-Kotlin logic (voice matching, DNS packet parsing,
+    // security heuristics) — no Android framework/device needed, runs via
+    // `./gradlew testDebugUnitTest`.
+    testImplementation("junit:junit:4.13.2")
 }
