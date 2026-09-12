@@ -14,7 +14,7 @@ import java.net.InetAddress
  */
 class DnsPacketProcessorTest {
 
-    private val clientIp = InetAddress.getByAddress(byteArrayOf(10, 111, 222, 5))
+    private val clientIp = InetAddress.getByAddress(byteArrayOf(10, 111, 222.toByte(), 5))
     private val dnsServerIp = InetAddress.getByAddress(byteArrayOf(8, 8, 8, 8))
     private val clientPort = 54321
 
