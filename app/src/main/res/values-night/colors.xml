@@ -1,0 +1,27 @@
+<resources>
+    <!-- Brand palette stays legible on dark; only surfaces/text invert -->
+    <color name="primary">#8A7FFF</color>
+    <color name="primary_dark">#5B4FE9</color>
+    <color name="primary_light">#2A2650</color>
+    <color name="accent">#2DE0C2</color>
+    <color name="danger">#FF6B6E</color>
+    <color name="success">#4ADE80</color>
+
+    <color name="background">#121218</color>
+    <color name="surface">#1D1E27</color>
+    <color name="outline">#31323F</color>
+
+    <color name="text_primary">#F2F2F7</color>
+    <color name="text_secondary">#A6A8B8</color>
+    <color name="text_on_primary">#121218</color>
+
+    <color name="bubble_user">@color/primary</color>
+    <color name="bubble_assistant">#262838</color>
+    <color name="bubble_user_text">#121218</color>
+    <color name="bubble_assistant_text">@color/text_primary</color>
+
+    <color name="status_on_bg">#173A29</color>
+    <color name="status_on_text">#4ADE80</color>
+    <color name="status_off_bg">#26262F</color>
+    <color name="status_off_text">#A6A8B8</color>
+</resources>

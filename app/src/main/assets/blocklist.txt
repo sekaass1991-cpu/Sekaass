@@ -1,0 +1,48 @@
+# Starter ad/tracker blocklist for the local DNS sinkhole (Feature E).
+# One bare domain per line. Blocking a domain also blocks its subdomains.
+# This is a small hand-picked starter set, NOT a comprehensive list — swap in
+# a full hosts-file style list (e.g. Steven Black's unified hosts) for real
+# day-to-day coverage. See README "Ad Blocking" for how.
+
+doubleclick.net
+googlesyndication.com
+googleadservices.com
+google-analytics.com
+googletagmanager.com
+googletagservices.com
+adservice.google.com
+adnxs.com
+adsafeprotected.com
+advertising.com
+adform.net
+adroll.com
+amazon-adsystem.com
+applovin.com
+bidswitch.net
+casalemedia.com
+criteo.com
+criteo.net
+doubleverify.com
+flurry.com
+inmobi.com
+mmstat.com
+mopub.com
+moatads.com
+outbrain.com
+pubmatic.com
+rubiconproject.com
+scorecardresearch.com
+smaato.net
+supersonicads.com
+taboola.com
+tapjoy.com
+unityads.unity3d.com
+vungle.com
+zedo.com
+app-measurement.com
+crashlytics.com
+branch.io
+adjust.com
+appsflyer.com
+analytics.twitter.com
+ads-twitter.com

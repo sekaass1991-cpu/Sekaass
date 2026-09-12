@@ -18,9 +18,12 @@ import java.util.Locale
 
 /**
  * Feature F: real-time speech-to-speech translation between English and
- * Tamil/Hindi/Telugu, using on-device ML Kit Translate +
- * language identification. The owner says "translate to tamil", then speaks
+ * Tamil/Hindi/Telugu, using on-device ML Kit Translate + language
+ * identification. The owner says "translate to tamil", then speaks
  * normally; each utterance is auto-detected, translated, and spoken back.
+ *
+ * Malayalam (also requested in the blueprint) isn't in ML Kit Translate's
+ * on-device language set — see the comment on [LANGUAGE_NAME_TO_CODE].
  *
  * Known limitation: this reuses the phone's single speech recognizer, so a
  * translation session and the always-on wake-word loop
@@ -135,6 +138,14 @@ class Translator(private val context: Context) {
     companion object {
         private const val TAG = "Translator"
 
+        // ML Kit Translate's on-device model set (~59 languages) does not include
+        // Malayalam — there is no TranslateLanguage.MALAYALAM constant. The
+        // blueprint asks for all four; Hindi/Tamil/Telugu work on-device here,
+        // and Malayalam would need swapping in a cloud API (e.g. Google Cloud
+        // Translation) for that one language, which trades away the "runs
+        // on-device, no network required after first download" property the
+        // other three have. Left as a follow-up rather than silently claiming
+        // support that doesn't exist.
         private val LANGUAGE_NAME_TO_CODE = mapOf(
             "english" to TranslateLanguage.ENGLISH,
             "hindi" to TranslateLanguage.HINDI,

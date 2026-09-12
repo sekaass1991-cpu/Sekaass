@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Personal Assistant</string>
+    <string name="notification_channel_service">Assistant running</string>
+    <string name="notification_channel_reminders">Reminders</string>
+    <string name="notification_channel_security">Security watchdog</string>
+    <string name="notification_channel_emergency">Emergency mode</string>
+    <string name="device_admin_label">Personal Assistant phone lock</string>
+    <string name="device_admin_description">Lets the assistant lock your screen when you say "lock my phone".</string>
+</resources>
